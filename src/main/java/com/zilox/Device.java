@@ -1,5 +1,6 @@
 package com.zilox;
 
+import com.zilox.command.SharedCommandQueueManager;
 import com.zilox.serial.Serial;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,11 +14,11 @@ public class Device {
     @Getter @Setter
     private Serial serial;
     @Getter
-    private SharedCommandQueue sharedQueue;
+    private SharedCommandQueueManager sharedQueueManager;
 
     public Device(String comPort, int vJoyId) {
         //sharedQueue must be first object to be instantiate as it is used by Serial and vJoyFeeder
-        sharedQueue = new SharedCommandQueue(this);
+        sharedQueueManager = new SharedCommandQueueManager(this);
         this.initDevice(comPort, vJoyId);
     }
 
@@ -25,7 +26,7 @@ public class Device {
         this.initializeSerialPort(comPort);
         this.initializevJoyDevices(vJoyId);
         LogLevel.FATAL("\nStarting Shared Queue Manager...\n");
-        sharedQueue.start();
+        sharedQueueManager.start();
     }
 
     private byte retrieveDeviceID(String comPort) {
@@ -46,13 +47,13 @@ public class Device {
     }
 
     private void initializevJoyDevices(int vJoyId) {
-        this.vJoyFeeder = new VJoyFeeder(vJoyId, sharedQueue);
+        this.vJoyFeeder = new VJoyFeeder(vJoyId, sharedQueueManager);
     }
 
     private void initializeSerialPort(String port) {
         if (port != null) {
             String comPort = port.toUpperCase().startsWith("COM") ? port : "COM" + port;
-            this.serial = new Serial(comPort, sharedQueue);
+            this.serial = new Serial(comPort, sharedQueueManager);
             this.serial.start();
         }
     }

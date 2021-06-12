@@ -1,8 +1,7 @@
 package com.zilox.vjoy;
 
 import static com.zilox.vjoy.ButtonState.*;
-import com.zilox.Command;
-import java.util.List;
+import com.zilox.command.Command;
 
 
 public class ButtonHandler {

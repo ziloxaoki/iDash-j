@@ -1,5 +1,6 @@
-package com.zilox;
+package com.zilox.command;
 
+import com.zilox.Utils;
 import lombok.Getter;
 
 import java.util.Arrays;

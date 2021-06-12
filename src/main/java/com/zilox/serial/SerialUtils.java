@@ -1,25 +1,20 @@
 package com.zilox.serial;
 
-import com.zilox.Command;
+import com.zilox.command.Command;
 import com.zilox.Constants;
-import com.zilox.SharedCommandQueue;
+import com.zilox.command.SharedCommandQueueManager;
 import com.zilox.Utils;
 
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class SerialUtils {
-    private SharedCommandQueue sharedCommandQueue;
+    private SharedCommandQueueManager sharedCommandQueueManager;
     
-    public SerialUtils(SharedCommandQueue sharedCommandQueue) {
-        this.sharedCommandQueue = sharedCommandQueue;
+    public SerialUtils(SharedCommandQueueManager sharedCommandQueueManager) {
+        this.sharedCommandQueueManager = sharedCommandQueueManager;
     }
 
     protected void sendTo7Segments(String msg) {
         Command command = new Command(Command.CMD_7_SEGS, Utils.convertByteTo7Segment(msg.getBytes(), 0));
-        sharedCommandQueue.addToQueue(command);
+        sharedCommandQueueManager.addToQueue(command);
     }
     
     protected void sendRPMShiftMsg(float currentRpm, float firstRpm, float lastRpm, int flag)
@@ -81,6 +76,6 @@ public class SerialUtils {
                 }
             }
         }
-        sharedCommandQueue.addToQueue(new Command(Command.CMD_RGB_SHIFT, rpmLedData));
+        sharedCommandQueueManager.addToQueue(new Command(Command.CMD_RGB_SHIFT, rpmLedData));
     }
 }

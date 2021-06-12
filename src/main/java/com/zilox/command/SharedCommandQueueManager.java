@@ -1,52 +1,53 @@
-package com.zilox;
+package com.zilox.command;
 
-import static com.zilox.Command.*;
+import static com.zilox.command.Command.*;
 import static com.zilox.Constants.DEBUG_MSG_DEBOUNCE_TIME;
 
+import com.zilox.Debouncer;
+import com.zilox.Device;
+import com.zilox.LogLevel;
+import com.zilox.VJoyFeeder;
 import com.zilox.serial.Serial;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-public class SharedCommandQueue extends Thread {
+public class SharedCommandQueueManager extends Thread {
     private Debouncer debugMsgDebouncer = new Debouncer(DEBUG_MSG_DEBOUNCE_TIME);
-    private ConcurrentLinkedQueue<Command> queue = new ConcurrentLinkedQueue<>();
+    private SharedCommandQueue sharedCommandQueue = new SharedCommandQueue();
+
     private Device device;
 
-    public SharedCommandQueue(Device device) {
+    public SharedCommandQueueManager(Device device) {
         this.device = device;
     }
 
     public void addToQueue(Command command) {
-        if (queue.size() > iDash.getProperties().getCommandQueueSizeLimit()) {
-            this.wipeOutQueueData();
-        }
-        queue.offer(command);
+        sharedCommandQueue.addToQueue(command);
     }
 
     public void addToQueue(Command[] commands) {
-        for (Command command : commands) {
-            this.addToQueue(command);
-        }
+        sharedCommandQueue.addToQueue(commands);
     }
 
     public Command pollFromQueue() {
-        return queue.poll();
+        return sharedCommandQueue.pollFromQueue();
     }
 
-    public Command[] pollAllFromQueue() {
-        Command[] result = new Command[queue.size()];
-        for (int x = 0; x < queue.size() - 1; x++) {
-            result[x] = queue.poll();
-        }
+    public void wipeOutQueueData() {
+        sharedCommandQueue.wipeOutQueueData();
+    }
 
-        return result;
+    public int getQueueCurrentSize() {
+        return sharedCommandQueue.getQueueCurrentSize();
+    }
+
+    public String dumpQueue() {
+        return sharedCommandQueue.dumpQueue();
     }
 
     private void processCommands() {
         Serial serial = device.getSerial();
         VJoyFeeder vJoyFeeder = device.getVJoyFeeder();
 
-        for (Command command : this.pollAllFromQueue()) {
+        for (Command command : sharedCommandQueue.pollAllFromQueue()) {
             if (command != null && command.getRawData() != null) {
                 switch (command.getCommandId()) {
                     //ACK message sent by Arduino
@@ -80,22 +81,9 @@ public class SharedCommandQueue extends Thread {
         }
     }
 
-    public void wipeOutQueueData() {
-        LogLevel.FATAL("Clearing full Queue!!!");
-        queue.clear();
-    }
-
-    public int getQueueCurrentSize() {
-        return queue.size();
-    }
-
     public void run() {
         while(!Thread.currentThread().isInterrupted()) {
             this.processCommands();
         }
-    }
-
-    public String dumpQueue() {
-        return queue.toString();
     }
 }

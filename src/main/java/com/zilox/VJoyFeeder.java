@@ -1,15 +1,17 @@
 package com.zilox;
 
 import com.sun.jna.Native;
+import com.zilox.command.Command;
+import com.zilox.command.CommandHandler;
+import com.zilox.command.SharedCommandQueueManager;
 import com.zilox.vjoy.ButtonHandler;
 import com.zilox.vjoy.ButtonState;
 import com.zilox.vjoy.VJoy;
 
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.zilox.Command.CMD_BUTTON_STATUS;
+import static com.zilox.command.Command.CMD_BUTTON_STATUS;
 import static com.zilox.Constants.DEBUG_MSG_DEBOUNCE_TIME;
 import static com.zilox.vjoy.VjdStat.*;
 
@@ -25,13 +27,13 @@ public class VJoyFeeder implements CommandHandler {
     public int jID = 0;
     private int axisX = 0, axisY = 0;
     private final Lock processLock = new ReentrantLock();
-    private SharedCommandQueue sharedCommandQueue;
+    private SharedCommandQueueManager sharedCommandQueueManager;
     private ButtonHandler buttonHandler;
 
-    public VJoyFeeder(int vjoyId, SharedCommandQueue sharedCommandQueue)
+    public VJoyFeeder(int vjoyId, SharedCommandQueueManager sharedCommandQueueManager)
     {
         jID = vjoyId;
-        this.sharedCommandQueue = sharedCommandQueue;
+        this.sharedCommandQueueManager = sharedCommandQueueManager;
         this.initializeJoystick();
         buttonHandler = new ButtonHandler(joystick.GetVJDButtonNumber(jID));
     }

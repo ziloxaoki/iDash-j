@@ -6,7 +6,9 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.zilox.*;
-import com.zilox.CommandHandler;
+import com.zilox.command.Command;
+import com.zilox.command.CommandHandler;
+import com.zilox.command.SharedCommandQueueManager;
 import lombok.Getter;
 
 import java.io.BufferedReader;
@@ -32,7 +34,7 @@ public class Serial extends Thread implements CommandHandler {
     private int commandLength = 0;
     private Debouncer debugMsgDebouncer = new Debouncer(DEBUG_MSG_DEBOUNCE_TIME);
     private Debouncer reconnectMsgDebouncer = new Debouncer(RECONNECT_MSG_DEBOUNCE_TIME);
-    private SharedCommandQueue sharedCommandQueue;
+    private SharedCommandQueueManager sharedCommandQueueManager;
     private SerialUtils serialUtils;
 
     /**
@@ -48,9 +50,9 @@ public class Serial extends Thread implements CommandHandler {
     /** Default bits per second for COM port. */
     private static final int DATA_RATE = 38400;
 
-    public Serial (String comPort, SharedCommandQueue sharedCommandQueue) {
-        this.sharedCommandQueue = sharedCommandQueue;
-        serialUtils = new SerialUtils(this.sharedCommandQueue);
+    public Serial (String comPort, SharedCommandQueueManager sharedCommandQueueManager) {
+        this.sharedCommandQueueManager = sharedCommandQueueManager;
+        serialUtils = new SerialUtils(this.sharedCommandQueueManager);
         this.connect(comPort);
     }
 
@@ -156,7 +158,7 @@ public class Serial extends Thread implements CommandHandler {
                 if (data != null) {
                     Command command = this.parseDataAndRetrieveCommand(data);
                     if (command != null) {
-                        sharedCommandQueue.addToQueue(command);
+                        sharedCommandQueueManager.addToQueue(command);
                         if (debugMsgDebouncer.debounce()) {
                             LogLevel.DEBUG(String.format("added to queue: %s", Utils.bytesToHexString(data)));
                             LogLevel.DEBUG(command.toString());
