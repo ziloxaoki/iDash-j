@@ -2,7 +2,6 @@ package com.zilox;
 
 import lombok.Getter;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -10,8 +9,6 @@ import java.util.Properties;
 
 public class Property {
     InputStream inputStream;
-    @Getter
-    private LogLevel logLevel = LogLevel.ERROR;
     @Getter
     private String[] comPorts;
     @Getter
@@ -26,9 +23,9 @@ public class Property {
     public Property() {
         try {
             Properties prop = new Properties();
-            String propFileName = "config.properties";
+            String propFileName = "/config.properties";
 
-            inputStream = new FileInputStream(propFileName);
+            inputStream = this.getClass().getResourceAsStream(propFileName);
 
             if (inputStream != null) {
                 prop.load(inputStream);
@@ -36,7 +33,6 @@ public class Property {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
             // get the property value and print it out
-            logLevel = LogLevel.valueOf(prop.getProperty("logLevel", "ERROR").toUpperCase());
             comPorts = prop.getProperty("comPorts", "").split(",");
             reconnectWaitTime = Integer.parseInt(prop.getProperty("reconnectWaitTime", "500"));
             devices = prop.getProperty("devices", "").split(",");
@@ -55,7 +51,6 @@ public class Property {
     @Override
     public String toString() {
         return "\n\nProperties = {\n" +
-                "\tlogLevel=" + logLevel + "\n" +
                 "\tcomPorts=" + Arrays.toString(comPorts) + "\n" +
                 "\tdevices=" + Arrays.toString(devices) + "(arduino:vJoy)\n" +
                 "\treconnectWaitTime=" + reconnectWaitTime + "(milis)\n" +

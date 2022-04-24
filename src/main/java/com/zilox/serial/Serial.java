@@ -1,7 +1,5 @@
 package com.zilox.serial;
 
-import static com.zilox.Constants.*;
-
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
@@ -10,6 +8,8 @@ import com.zilox.command.Command;
 import com.zilox.command.CommandHandler;
 import com.zilox.command.SharedCommandQueueManager;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.OutputStream;
@@ -22,11 +22,15 @@ import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.zilox.Constants.DEBUG_MSG_DEBOUNCE_TIME;
+import static com.zilox.Constants.RECONNECT_MSG_DEBOUNCE_TIME;
+
 public class Serial extends Thread implements CommandHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Serial.class);
+
     private SerialPort serialPort;
     @Getter
     private String deviceId;
-    private byte[] writeBuffer;
     private Queue<byte[]> dataQueue = new LinkedList<>();
     private final Lock readLock = new ReentrantLock();
     private final Lock processLock = new ReentrantLock();
@@ -69,7 +73,7 @@ public class Serial extends Thread implements CommandHandler {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        LogLevel.TRACE(e.getStackTrace());
+                        LOGGER.error("Error opening port. ", e.getStackTrace());
                     }
 
                     serialPort.addDataListener(new SerialPortDataListener() {
@@ -95,7 +99,7 @@ public class Serial extends Thread implements CommandHandler {
                 }
             } else {
                 if(reconnectMsgDebouncer.debounce()) {
-                    LogLevel.FATAL(String.format("%s not found. Please connect arduino to usb port.", comPort));
+                    LOGGER.warn(String.format("%s not found. Please connect arduino to usb port.", comPort));
                 }
             }
         }
@@ -160,8 +164,8 @@ public class Serial extends Thread implements CommandHandler {
                     if (command != null) {
                         sharedCommandQueueManager.addToQueue(command);
                         if (debugMsgDebouncer.debounce()) {
-                            LogLevel.DEBUG(String.format("added to queue: %s", Utils.bytesToHexString(data)));
-                            LogLevel.DEBUG(command.toString());
+                            LOGGER.debug(String.format("added to queue: %s", Utils.bytesToHexString(data)));
+                            LOGGER.debug(command.toString());
                         }
                     }
                 }
@@ -169,7 +173,7 @@ public class Serial extends Thread implements CommandHandler {
                 readLock.notifyAll();
             }
         } catch (InterruptedException e) {
-            LogLevel.TRACE(e.getStackTrace());
+            LOGGER.error("Error reading data from poll. ", e.getStackTrace());
         }
     }
 
@@ -189,7 +193,7 @@ public class Serial extends Thread implements CommandHandler {
                     this.connect(deviceId);
                     Thread.sleep(iDash.getProperties().getReconnectWaitTime());
                 } catch (Exception e) {
-                    LogLevel.TRACE(e.getStackTrace());
+                    LOGGER.error("Error connecting to COM Port " + deviceId, e.getStackTrace());
                 }
             }
         }

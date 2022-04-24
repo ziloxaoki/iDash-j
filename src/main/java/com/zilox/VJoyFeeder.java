@@ -7,24 +7,26 @@ import com.zilox.command.SharedCommandQueueManager;
 import com.zilox.vjoy.ButtonHandler;
 import com.zilox.vjoy.ButtonState;
 import com.zilox.vjoy.VJoy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.zilox.command.Command.CMD_BUTTON_STATUS;
 import static com.zilox.Constants.DEBUG_MSG_DEBOUNCE_TIME;
+import static com.zilox.command.Command.CMD_BUTTON_STATUS;
+import static com.zilox.vjoy.HIDUsages.*;
 import static com.zilox.vjoy.VjdStat.*;
 
-import static com.zilox.vjoy.HIDUsages.*;
-
 public class VJoyFeeder implements CommandHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VJoyFeeder.class);
     private Debouncer debugMsgDebouncer = new Debouncer(DEBUG_MSG_DEBOUNCE_TIME);
     // Declaring one joystick (Device id 1) and a position structure. 
     private static int CENTER = 16384;
     //private static int AXIS_OFFSET = 4;
     private static int AXIS_OFFSET = 0;
     public VJoy joystick;
-    public int jID = 0;
+    public int jID;
     private int axisX = 0, axisY = 0;
     private final Lock processLock = new ReentrantLock();
     private SharedCommandQueueManager sharedCommandQueueManager;
@@ -40,12 +42,12 @@ public class VJoyFeeder implements CommandHandler {
 
     private void initializeJoystick() {
         if (joystick == null)
-            joystick = (VJoy) Native.load("./native/64/vJoyInterface",
+            joystick = Native.load("./native/64/vJoyInterface",
                     VJoy.class);
 
         // Get the driver attributes (Vendor ID, Product ID, Version Number)
         if (!joystick.vJoyEnabled()) {
-            LogLevel.WARN("\nvJoy driver not enabled: Failed Getting vJoy attributes.");
+            LOGGER.warn("\nvJoy driver not enabled: Failed Getting vJoy attributes.");
             return;
         } else {
             System.out.println(String.format("Vendor: {%s} Product :{%s} Version Number:{%s}", joystick.GetvJoyManufacturerString(), joystick.GetvJoyProductString(), joystick.GetvJoySerialNumberString()));
@@ -115,7 +117,7 @@ public class VJoyFeeder implements CommandHandler {
             ButtonState bState =  buttonStates[i];
             joystick.SetBtn(bState == ButtonState.KEY_DOWN || bState == ButtonState.KEY_HOLD, jID, (byte)(i + 1));
             if (debugMsgDebouncer.debounce()) {
-                LogLevel.DEBUG(String.format("Set button states: %s", Utils.bytesToHexString(command.getRawData())));
+                LOGGER.debug(String.format("Set button states: %s", Utils.bytesToHexString(command.getRawData())));
             }
         }
     }

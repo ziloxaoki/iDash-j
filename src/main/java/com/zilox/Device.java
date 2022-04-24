@@ -4,11 +4,15 @@ import com.zilox.command.SharedCommandQueueManager;
 import com.zilox.serial.Serial;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Device {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Device.class);
+
     @Getter @Setter
     private VJoyFeeder vJoyFeeder;
     @Getter @Setter
@@ -25,7 +29,7 @@ public class Device {
     private void initDevice(String comPort, int vJoyId) {
         this.initializeSerialPort(comPort);
         this.initializevJoyDevices(vJoyId);
-        LogLevel.FATAL("\nStarting Shared Queue Manager...\n");
+        LOGGER.debug("\nStarting Shared Queue Manager...\n");
         sharedQueueManager.start();
     }
 
@@ -39,7 +43,7 @@ public class Device {
         try {
             return Byte.parseByte(result);
         } catch(NumberFormatException e) {
-            LogLevel.TRACE(e.getStackTrace());
+            LOGGER.error("Error retrieving device ID. "+e.getStackTrace());
             System.err.println(comPort + "is not a valid.");
         }
 

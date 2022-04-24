@@ -1,15 +1,18 @@
 package com.zilox.command;
 
-import static com.zilox.command.Command.*;
-import static com.zilox.Constants.DEBUG_MSG_DEBOUNCE_TIME;
-
 import com.zilox.Debouncer;
 import com.zilox.Device;
-import com.zilox.LogLevel;
 import com.zilox.VJoyFeeder;
 import com.zilox.serial.Serial;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.zilox.Constants.DEBUG_MSG_DEBOUNCE_TIME;
+import static com.zilox.command.Command.*;
 
 public class SharedCommandQueueManager extends Thread {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SharedCommandQueueManager.class);
+
     private Debouncer debugMsgDebouncer = new Debouncer(DEBUG_MSG_DEBOUNCE_TIME);
     private SharedCommandQueue sharedCommandQueue = new SharedCommandQueue();
 
@@ -58,7 +61,7 @@ public class SharedCommandQueueManager extends Thread {
                     case CMD_7_SEGS:
                         if (serial != null) {
                             if (debugMsgDebouncer.debounce()) {
-                                LogLevel.DEBUG("Processing serial command:" + command);
+                                LOGGER.debug("Processing serial command:" + command);
                             }
                             serial.processCommand(command);
                         }
@@ -67,7 +70,7 @@ public class SharedCommandQueueManager extends Thread {
                     case CMD_BUTTON_STATUS:
                         if (vJoyFeeder != null) {
                             if (debugMsgDebouncer.debounce()) {
-                                LogLevel.DEBUG("Processing vJoy command:" + command);
+                                LOGGER.debug("Processing vJoy command:" + command);
                             }
                             vJoyFeeder.processCommand(command);
                         }

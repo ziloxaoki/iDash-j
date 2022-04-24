@@ -1,10 +1,16 @@
 package com.zilox.vjoy;
 
-import static com.zilox.vjoy.ButtonState.*;
 import com.zilox.command.Command;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.zilox.vjoy.ButtonState.KEY_DOWN;
+import static com.zilox.vjoy.ButtonState.NONE;
 
 
 public class ButtonHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ButtonHandler.class);
+
     private ButtonState[] currentStates;
 
     public ButtonHandler(int numberOfButtons) {
@@ -37,6 +43,7 @@ public class ButtonHandler {
                 if (offset < currentStates.length) {
                     currentStates[offset++] = ButtonState.nextDownState(currentState);
                 } else {
+                    LOGGER.debug(String.format("Button %s pressed.", offset ));
                     //default button state when pressed
                     currentStates[offset++] = KEY_DOWN;
                 }

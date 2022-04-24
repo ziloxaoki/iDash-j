@@ -1,11 +1,14 @@
 package com.zilox.command;
 
-import com.zilox.LogLevel;
 import com.zilox.iDash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SharedCommandQueue {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SharedCommandQueue.class);
+
     private ConcurrentLinkedQueue<Command> queue = new ConcurrentLinkedQueue<>();
 
     public void addToQueue(Command command) {
@@ -35,7 +38,7 @@ public class SharedCommandQueue {
     }
 
     public void wipeOutQueueData() {
-        LogLevel.FATAL("Clearing full Queue!!!");
+        LOGGER.debug("Clearing full Queue!!!");
         queue.clear();
     }
 

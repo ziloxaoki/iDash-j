@@ -52,9 +52,6 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <excludes>
-                        <exclude>config.properties</exclude>
-                    </excludes>
                     <includes>
                         <include>${project.basedir}/lib/irsdkjava-spring-boot-starter-1.0.0-20201022.134936-1.jar</include>
                     </includes>
@@ -115,16 +112,6 @@
                 <version>2.4.6</version>
             </plugin>
         </plugins>
-
-        <resources>
-            <resource>
-                <directory>${project.basedir}</directory>
-                <targetPath>${project.build.directory}</targetPath>
-                <includes>
-                    <include>config.properties</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
 
     <repositories>
@@ -179,6 +166,11 @@
             <version>1.0-SNAPSHOT</version>
             <systemPath>${pom.basedir}/lib/irsdkjava-spring-boot-starter-1.0.0-20201022.134936-1.jar</systemPath>
             <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+            <version>5.3.9</version>
         </dependency>
     </dependencies>
 
