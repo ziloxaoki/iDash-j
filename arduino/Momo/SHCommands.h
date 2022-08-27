@@ -16,15 +16,13 @@ void Command_ButtonsCount() {
 	FlowSerialFlush();
 }
 
-void Command_TM1638Count() {  
-	//FlowSerialWrite((byte)(TM1638_ENABLEDMODULES));
-  FlowSerialWrite(0);
+void Command_TM1638Count() {
+	FlowSerialWrite((byte)(TM1638_ENABLEDMODULES));
 	FlowSerialFlush();
 }
 
 void Command_SimpleModulesCount() {
-	//FlowSerialWrite((byte)(MAX7221_ENABLEDMODULES + TM1637_ENABLEDMODULES + ENABLE_ADA_HT16K33_7SEGMENTS));
-  FlowSerialWrite(0);
+	FlowSerialWrite((byte)(MAX7221_ENABLEDMODULES + TM1637_ENABLEDMODULES + ENABLE_ADA_HT16K33_7SEGMENTS));
 	FlowSerialFlush();
 }
 
@@ -150,7 +148,6 @@ void Command_Features() {
 	delay(10);
 
 	// Matrix
-	/*
 	if (MAX7221_MATRIX_ENABLED == 1 || ENABLE_ADA_HT16K33_BiColorMatrix == 1 || ENABLE_ADA_HT16K33_SingleColorMatrix == 1) {
 		FlowSerialPrint("M");
 	}
@@ -165,7 +162,7 @@ void Command_Features() {
 	if (ENABLED_NOKIALCD > 0 || ENABLED_OLEDLCD > 0) {
 		FlowSerialPrint("K");
 	}
-  */
+
 	// Gear
 	FlowSerialPrint("G");
 
@@ -185,9 +182,9 @@ void Command_Features() {
 	FlowSerialPrint("X");
 
 	// RGB MATRIX
-	/*if (WS2812B_MATRIX_ENABLED > 0) {
+	if (WS2812B_MATRIX_ENABLED > 0) {
 		FlowSerialPrint("R");
-	}*/
+	}
 
 #if defined(INCLUDE_SHAKEITADASHIELD) || defined(INCLUDE_SHAKEITDKSHIELD) || defined(INCLUDE_SHAKEITL298N) || defined(INCLUDE_SHAKEITMOTOMONSTER) || defined(INCLUDE_SHAKEITPWM)  || defined(INCLUDE_SHAKEITPWMFANS)
 	// Afafuit motorshields
